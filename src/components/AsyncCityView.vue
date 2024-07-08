@@ -11,7 +11,7 @@
       </p>
     </div>
     <!--Weather Overview-->
-    <div class="flex flex-col items-center text-white py-12">
+    <div v-if="weatherData" class="flex flex-col items-center text-white py-12">
       <h1 class="text-4xl mb-2">{{ route.params.city }}</h1>
       <p class="text-sm mb-12">
         {{
@@ -27,10 +27,9 @@
           })
         }}
       </p>
-      <p v-if="weatherData" class="text-4xl mb-2">
+      <p class="text-4xl mb-2">
         {{ Math.round(weatherData.current.temp) }}&deg;
       </p>
-
       <p>
         Feels Like
         {{ Math.round(weatherData.current.feels_like) }} &deg;
@@ -39,16 +38,15 @@
         {{ weatherData.current.weather[0].description }}
       </p>
       <img
-        class="w-[150px]"
-        h-auto
-        :src="'http://openweathermap.org/img/wn/03d@2x.png'"
+        class="w-[150px] h-auto"
+        :src="`http://openweathermap.org/img/wn/${weatherData.current.weather[0].icon}@2x.png`"
         alt=""
       />
     </div>
 
     <hr class="border-white border-opacity-10 border w-full" />
     <!---Hourly Weather-->
-    <div class="max-w-screen-md w-full py-12">
+    <div v-if="weatherData" class="max-w-screen-md w-full py-12">
       <div class="mx-8 text-white">
         <h2 class="mb-4">Hourly Weather</h2>
         <div class="flex gap-10 overflow-x-scroll">
@@ -66,7 +64,7 @@
             </p>
             <img
               class="w-auto h-[50px] object-cover"
-              :src="'https://openweathermap.org/img/wn/01d@2x.png'"
+              :src="`https://openweathermap.org/img/wn/${hourData.weather[0].icon}@2x.png`"
               alt=""
             />
             <p class="text-xl">{{ Math.round(hourData.temp) }}&deg;</p>
@@ -77,8 +75,7 @@
 
     <hr class="border-white border-opacity-10 border w-full" />
     <!--Weekly Overview-->
-
-    <div class="max-w-screen-md w-full py-12">
+    <div v-if="weatherData" class="max-w-screen-md w-full py-12">
       <div class="mx-8 text-white">
         <h2 class="mb-4">7 Day Forecast</h2>
         <div
@@ -95,7 +92,7 @@
           </p>
           <img
             class="w-[150px] h-[150px] object-cover"
-            :src="'https://openweathermap.org/img/wn/02d@2x.png'"
+            :src="`https://openweathermap.org/img/wn/${day.weather[0].icon}@2x.png`"
             alt=""
           />
           <div class="flex gap-2 flex-1 justify-end">
@@ -116,12 +113,12 @@ import { useRoute } from "vue-router";
 const route = useRoute();
 const weatherData = ref(null);
 
-const getWeatherData = async (id) => {
+const getWeatherData = async () => {
   try {
     const response = await axios.get(
-      `https://api.openweathermap.org/data/3.0/onecall?lat=${route.query.lat}&lon=${route.query.lng}&exclude={part}&appid=3659b7a8b5e7572358698ad695eddfb9&units=metric`
+      `https://api.openweathermap.org/data/3.0/onecall?lat=${route.query.lat}&lon=${route.query.lng}&exclude=minutely,alerts&appid=3659b7a8b5e7572358698ad695eddfb9&units=metric`
     );
-    console.log("baty", "response.data");
+    console.log("Weather data:", response.data);
 
     const data = response.data;
     const localOffset = new Date().getTimezoneOffset() * 60000;
@@ -133,9 +130,9 @@ const getWeatherData = async (id) => {
       hour.currentTime = utc + 1000 * data.timezone_offset;
     });
 
-    weatherData.value = data; // weatherData'yı güncelleyin
+    weatherData.value = data;
   } catch (err) {
-    console.error("Hava durumu verisi alınırken hata oluştu:", err);
+    console.error("Error fetching weather data:", err);
   }
 };
 
