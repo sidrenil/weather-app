@@ -16,6 +16,7 @@
         ></i>
         <i
           class="fa-solid fa-plus text-xl hover:text-weather-secondary duration-150 cursor-pointer"
+          @click="addCity"
         ></i>
       </div>
 
@@ -43,7 +44,7 @@
           <h1 class="text-2xl">Removing a city</h1>
           <p class="mb-4">
             If you no longer wish to track a city, simply select the city within
-            the home page. At the bottom of the page, there be am option to
+            the home page. At the bottom of the page, there be an option to
             delete the city.
           </p>
         </div>
@@ -53,12 +54,54 @@
 </template>
 
 <script setup>
-import { RouterLink } from "vue-router";
-import BaseModal from "./BaseModal.vue";
 import { ref } from "vue";
+import { uid } from "uid";
+import { RouterLink, useRoute, useRouter } from "vue-router";
+import BaseModal from "./BaseModal.vue";
 
-const modalActive = ref(null);
+const savedCities = ref([]);
+const route = useRoute();
+const router = useRouter();
+
+const loadSavedCities = () => {
+  const savedCitiesData = localStorage.getItem("savedCities");
+  if (savedCitiesData) {
+    savedCities.value = JSON.parse(savedCitiesData);
+  }
+};
+
+const addCity = () => {
+  loadSavedCities();
+
+  const locationObj = {
+    id: uid(),
+    state: route.params.state || "",
+    city: route.params.city,
+    coords: {
+      lat: route.query.lat,
+      lng: route.query.lng,
+    },
+  };
+
+  const isCityAlreadySaved = savedCities.value.some(
+    (city) => city.city === locationObj.city && city.state === locationObj.state
+  );
+
+  if (!isCityAlreadySaved) {
+    savedCities.value.push(locationObj);
+    localStorage.setItem("savedCities", JSON.stringify(savedCities.value));
+    let query = Object.assign({}, route.query);
+    delete query.preview;
+    router.replace({ query });
+  } else {
+    alert("City is already saved.");
+  }
+};
+
+const modalActive = ref(false);
 const toggleModal = () => {
   modalActive.value = !modalActive.value;
 };
+
+loadSavedCities();
 </script>
