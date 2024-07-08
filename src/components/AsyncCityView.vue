@@ -13,9 +13,29 @@
     <!--Weather Overview-->
     <div class="flex flex-col items-center text-white py-12">
       <h1 class="text-4xl mb-2">{{ route.params.city }}</h1>
+      <p class="text-sm mb-12">
+        {{
+          new Date(weatherData.currentTime).toLocaleDateString("en-us", {
+            weekday: "short",
+            day: "2-digit",
+            month: "long",
+          })
+        }}
+        {{
+          new Date(weatherData.currentTime).toLocaleTimeString("en-us", {
+            timeStyle: "short",
+          })
+        }}
+      </p>
       <p v-if="weatherData" class="text-4xl mb-2">
         {{ Math.round(weatherData.current.temp) }}&deg;
       </p>
+      <div class="text-center">
+        <p>
+          Feels Like
+          {{ Math.round(weatherData.current.feels_like) }} &deg;
+        </p>
+      </div>
     </div>
   </div>
 </template>
