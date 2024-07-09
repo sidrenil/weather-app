@@ -43,6 +43,8 @@ const getCities = async () => {
     }
   }
 };
+//Flicker Delay
+await new Promise((res) => setTimeout(res, 1000));
 
 onMounted(async () => {
   await getCities();
